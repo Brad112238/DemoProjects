@@ -1,4 +1,10 @@
 
+using Microsoft.EntityFrameworkCore;
+using WebApiDemo.Application;
+using WebApiDemo.Interfaces;
+using WebApiDemo.Models.TestDb;
+using WebApiDemo.Services;
+
 namespace WebApiDemo
 {
     public class Program
@@ -12,6 +18,16 @@ namespace WebApiDemo
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+
+            builder.Services.AddDbContext<TestContext>(options =>
+            {
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("TestDb"));
+            });
+
+            builder.Services.AddScoped<IUserCreditService, UserCreditService>();
+            builder.Services.AddScoped<IEcpayService, EcpayService>();
+            builder.Services.AddScoped<UserCreditApplication>();
 
             var app = builder.Build();
 

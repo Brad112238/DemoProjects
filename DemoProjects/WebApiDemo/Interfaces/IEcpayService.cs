@@ -4,7 +4,7 @@ using WebApiDemo.ViewModels.Ecpay;
 
 namespace WebApiDemo.Interfaces
 {
-    public interface IEcpayTokenService
+    public interface IEcpayService
     {
         Task<AppResult<EcpayTokenResponse>> CreateTradeTokenAsync(EcpayViewModel request);
 

@@ -10,7 +10,7 @@ using WebApiDemo.ViewModels.Ecpay;
 
 namespace WebApiDemo.Services
 {
-    public class EcpayService : IEcpayTokenService
+    public class EcpayService : IEcpayService
     {
         private readonly IConfiguration _config;
         private readonly IHttpClientFactory _httpClientFactory;

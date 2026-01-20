@@ -5,7 +5,7 @@ namespace WebApiDemo.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AddCreditController : ControllerBase
+    public class UserCreditController : ControllerBase
     {
 
     }
