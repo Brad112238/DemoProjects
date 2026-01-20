@@ -605,13 +605,11 @@ namespace NetPriceRegistration
 
                 string part = input.Trim();
 
-                // 必須包含「層」或「樓」
                 if (!part.Contains("層") && !part.Contains("樓"))
                     return (int?)null;
 
                 bool isBasement = part.Contains("地下");
 
-                // 擷取中文數字
                 var match = Regex.Match(part, @"[一二三四五六七八九十百零〇]+");
                 if (!match.Success)
                     return (int?)null;
