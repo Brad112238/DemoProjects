@@ -1,13 +1,15 @@
-﻿using WebApiDemo.ViewModels.Ecpay;
+﻿using System.Threading.Tasks;
+using WebApiDemo.ViewModels;
+using WebApiDemo.ViewModels.Ecpay;
 
 namespace WebApiDemo.Interfaces
 {
     public interface IEcpayTokenService
     {
-        Task<EcpayTokenResponse> CreateTradeTokenAsync(EcpayViewModel request);
+        Task<AppResult<EcpayTokenResponse>> CreateTradeTokenAsync(EcpayViewModel request);
 
-        Task<EcpayCreatePaymentResponse> CreatePaymentAsync(string payToken, string merchantTradeNo);
+        Task<AppResult<EcpayCreatePaymentResponse>> CreatePaymentAsync(string payToken, string merchantTradeNo);
 
-        Task<EcpayIssueInvoiceResult> IssueInvoiceAsync(EcpayInvoiceRequest request);
-    }e
+        Task<AppResult<EcpayIssueInvoiceResult>> IssueInvoiceAsync(EcpayInvoiceRequest request);
+    }
 }

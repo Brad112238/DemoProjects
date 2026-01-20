@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using WebApiDemo.Interfaces;
+using WebApiDemo.ViewModels;
 using WebApiDemo.ViewModels.Ecpay;
 
 namespace WebApiDemo.Services
@@ -23,10 +23,9 @@ namespace WebApiDemo.Services
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<EcpayTokenResponse> CreateTradeTokenAsync(EcpayViewModel request)
+        public async Task<AppResult<EcpayTokenResponse>> CreateTradeTokenAsync(EcpayViewModel request)
         {
-            string tradeNo = $"{DateTime.Now:yyyyMMdd}{Guid.NewGuid():N}".Substring(0, 18);
-
+            string tradeNo = $"{DateTime.Now:yyyyMMdd}{Guid.NewGuid():N}"[..18];
             string tradeDate = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
 
             var payload = new Dictionary<string, object>
@@ -86,33 +85,62 @@ namespace WebApiDemo.Services
                     "application/json"));
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception("ECPay GetToken API 呼叫失敗");
+            {
+                return new AppResult<EcpayTokenResponse>
+                {
+                    Code = 400,
+                    Success = false,
+                    Message = "ECPay GetToken API 呼叫失敗"
+                };
+            }
 
             string responseText = await response.Content.ReadAsStringAsync();
             var responseJson = JsonConvert.DeserializeObject<Dictionary<string, object>>(responseText) ?? throw new Exception("ECPay 回傳為空");
 
             if (!responseJson.TryGetValue("Data", out var encryptedResponse))
-                throw new Exception("ECPay 回傳缺少 Data");
+            {
+                return new AppResult<EcpayTokenResponse>
+                {
+                    Code = 400,
+                    Success = false,
+                    Message = "ECPay 回傳缺少 Data"
+                };
+            }
 
             string decrypted = Decrypt(encryptedResponse.ToString(), _config["EcPay:HashKey"], _config["EcPay:HashIV"]);
 
             string decoded = HttpUtility.UrlDecode(decrypted);
 
-            var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(decoded) ?? throw new Exception("ECPay 解密失敗");
+            var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(decoded);
 
             if (data["RtnCode"]?.ToString() != "1")
-                throw new Exception($"ECPay 交易失敗：{data["RtnMsg"]}");
-
-            return new EcpayTokenResponse
+            {
+                return new AppResult<EcpayTokenResponse>
+                {
+                    Code = 400,
+                    Success = false,
+                    Message = $"ECPay 交易失敗：{data["RtnMsg"]}"
+                };
+            }
+            
+            var responseToApp = new EcpayTokenResponse
             {
                 MerchantID = data["MerchantID"]!.ToString()!,
                 MerchantTradeNo = tradeNo,
                 Token = data["Token"]!.ToString()!,
                 TokenExpireDate = data["TokenExpireDate"]!.ToString()!
             };
+
+            return new AppResult<EcpayTokenResponse>
+            {
+                Code = 200,
+                Success = true,
+                Message = "交易成功",
+                Data = responseToApp
+            };
         }
 
-        public async Task<EcpayCreatePaymentResponse> CreatePaymentAsync(string payToken, string merchantTradeNo)
+        public async Task<AppResult<EcpayCreatePaymentResponse>> CreatePaymentAsync(string payToken, string merchantTradeNo)
         {
             var payload = new Dictionary<string, object>
             {
@@ -148,40 +176,72 @@ namespace WebApiDemo.Services
             );
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception("ECPay CreatePayment API 呼叫失敗");
+            {
+                return new AppResult<EcpayCreatePaymentResponse>
+                {
+                    Code = 400,
+                    Success = false,
+                    Message = "ECPay CreatePayment API 呼叫失敗"
+                };
+            }
 
             string responseText = await response.Content.ReadAsStringAsync();
-            var responseJson = JsonConvert.DeserializeObject<Dictionary<string, object>>(responseText) ?? throw new Exception("ECPay 回傳為空");
+            var responseJson = JsonConvert.DeserializeObject<Dictionary<string, object>>(responseText);
 
             if (!responseJson.TryGetValue("Data", out var encryptedResponse))
-                throw new Exception("ECPay 回傳缺少 Data");
+            {
+                return new AppResult<EcpayCreatePaymentResponse>
+                {
+                    Code = 400,
+                    Success = false,
+                    Message = "ECPay 回傳缺少 Data"
+                };
+            }
 
             string decrypted = Decrypt(encryptedResponse.ToString(), _config["EcPay:HashKey"], _config["EcPay:HashIV"]);
 
             string decoded = WebUtility.UrlDecode(decrypted);
 
-            var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(decoded) ?? throw new Exception("ECPay 解密失敗");
+            var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(decoded);
 
             if (data["RtnCode"]?.ToString() != "1")
-                throw new Exception($"ECPay CreatePayment 失敗：{data["RtnMsg"]}");
+            {
+                return new AppResult<EcpayCreatePaymentResponse>
+                {
+                    Code = 400,
+                    Success = false,
+                    Message = $"ECPay CreatePayment 失敗：{data["RtnMsg"]}"
+                };
+            }
 
             if (!data.TryGetValue("ThreeDInfo", out var threeDInfoRaw))
-                throw new Exception("ECPay 回傳缺少 ThreeDInfo");
+            {
+                return new AppResult<EcpayCreatePaymentResponse>
+                {
+                    Code = 400,
+                    Success = false,
+                    Message = "ECPay 回傳缺少 ThreeDInfo"
+                };
+            }
 
             var threeDInfo = JObject.Parse(threeDInfoRaw.ToString()!);
 
             var threeDUrl = threeDInfo["ThreeDURL"]?.ToString();
 
-            if (string.IsNullOrWhiteSpace(threeDUrl))
-                throw new Exception("ThreeDURL 為空");
-
-            return new EcpayCreatePaymentResponse
+            var responseToApp = new EcpayCreatePaymentResponse
             {
                 ThreeDURL = threeDUrl
             };
+
+            return new AppResult<EcpayCreatePaymentResponse>
+            {
+                Code = 200,
+                Success = true,
+                Data = responseToApp
+            };
         }
 
-        public async Task<EcpayIssueInvoiceResult> IssueInvoiceAsync(EcpayInvoiceRequest request)
+        public async Task<AppResult<EcpayIssueInvoiceResult>> IssueInvoiceAsync(EcpayInvoiceRequest request)
         {
             var invoicePayload = new Dictionary<string, object>
             {
@@ -249,8 +309,9 @@ namespace WebApiDemo.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                return new EcpayIssueInvoiceResult
+                return new AppResult<EcpayIssueInvoiceResult>
                 {
+                    Code = 400,
                     Success = false,
                     Message = "ECPay 發票 API 呼叫失敗"
                 };
@@ -261,8 +322,9 @@ namespace WebApiDemo.Services
 
             if (responseJson == null || !responseJson.TryGetValue("Data", out var encryptedResponse))
             {
-                return new EcpayIssueInvoiceResult
+                return new AppResult<EcpayIssueInvoiceResult>
                 {
+                    Code = 400,
                     Success = false,
                     Message = "ECPay 回傳格式錯誤"
                 };
@@ -275,8 +337,9 @@ namespace WebApiDemo.Services
 
             if (data == null)
             {
-                return new EcpayIssueInvoiceResult
+                return new AppResult<EcpayIssueInvoiceResult>
                 {
+                    Code = 400,
                     Success = false,
                     Message = "發票資料解析失敗"
                 };
@@ -284,16 +347,24 @@ namespace WebApiDemo.Services
 
             if (data["RtnCode"]?.ToString() == "1")
             {
-                return new EcpayIssueInvoiceResult
+
+                return new AppResult<EcpayIssueInvoiceResult>
                 {
+                    Code = 200,
                     Success = true,
-                    InvoiceNumber = data["InvoiceNo"]?.ToString(),
-                    Message = data["RtnMsg"]?.ToString()
+                    Message = "發票處理成功",
+                    Data = new EcpayIssueInvoiceResult
+                    {
+                        Success = true,
+                        InvoiceNumber = data["InvoiceNo"]?.ToString(),
+                        Message = data["RtnMsg"]?.ToString()
+                    }
                 };
             }
 
-            return new EcpayIssueInvoiceResult
+            return new AppResult<EcpayIssueInvoiceResult>
             {
+                Code = 500,
                 Success = false,
                 Message = data["RtnMsg"]?.ToString()
             };
