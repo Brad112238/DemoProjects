@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+defaults:
+  run:
+    working-directory: DemoProjects
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore
+
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -f WebApiDemo/Dockerfile -t webapidemo:ci .
+
+      - name: Run container and health check
+        run: |
+          docker run -d --name webapi-test -p 8080:8080 \
+            -e ASPNETCORE_ENVIRONMENT=Development \
+            webapidemo:ci
+          sleep 10
+          curl --fail http://localhost:8080/api/health || (docker logs webapi-test && exit 1)
+          docker stop webapi-test
+          docker rm webapi-test
