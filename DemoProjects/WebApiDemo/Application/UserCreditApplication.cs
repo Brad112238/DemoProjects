@@ -1,5 +1,6 @@
-﻿using WebApiDemo.Interfaces;
-using WebApiDemo.Services;
+﻿using Microsoft.EntityFrameworkCore;
+using WebApiDemo.Interfaces;
+using WebApiDemo.Models.TestDb;
 using WebApiDemo.ViewModels;
 using WebApiDemo.ViewModels.Ecpay;
 using WebApiDemo.ViewModels.UserCredit;
@@ -17,6 +18,17 @@ namespace WebApiDemo.Application
         {
             _userCreditService = userCreditService;
             _ecpayService = ecpayService;
+        }
+
+        public async Task<List<UserCredit>> GetAllAsync()
+        {
+            return await _userCreditService.Query().ToListAsync();
+        }
+
+        public async Task<UserCredit?> GetByIdAsync(int id)
+        {
+            return await _userCreditService.Query()
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<AppResult<CreateTradeTokenResponse>> CreateTradeToken(CreateTradeTokenRequest request)

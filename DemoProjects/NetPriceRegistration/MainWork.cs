@@ -1,5 +1,7 @@
 ﻿using HouseGo.Tools.PriceRegistration.Helper;
 using Microsoft.EntityFrameworkCore;
+using NetPriceRegistration.Data;
+using NetPriceRegistration.Models;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using ProjNet.CoordinateSystems;
@@ -16,7 +18,7 @@ namespace NetPriceRegistration
     {
         private static HouseGoA10Context CreateDb()
         {
-            var options = new DbContextOptionsBuilder<HouseGoA10Context>().UseSqlServer("Server=tcp:fx28acw6op.database.windows.net,1433;Database=HouseGoA10;User ID=VisUser@fx28acw6op;Password=284ru6@*$"+"XU$;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;").Options;
+            var options = new DbContextOptionsBuilder<HouseGoA10Context>().UseSqlServer("").Options;
 
             return new HouseGoA10Context(options);
         }

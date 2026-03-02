@@ -25,6 +25,7 @@ namespace WebApiDemo
                     builder.Configuration.GetConnectionString("TestDb"));
             });
 
+            builder.Services.AddHttpClient();
             builder.Services.AddScoped<IUserCreditService, UserCreditService>();
             builder.Services.AddScoped<IEcpayService, EcpayService>();
             builder.Services.AddScoped<UserCreditApplication>();
