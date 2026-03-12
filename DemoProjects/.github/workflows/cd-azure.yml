@@ -1,0 +1,65 @@
+name: CD (Azure)
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  # 第一步：CI 測試
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore
+
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+
+  # 第二步：Build image 並 Push 到 Azure Container Registry (ACR)
+  push-image:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v4
+
+      # 登入 Azure Container Registry
+      - name: Login to ACR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ACR_LOGIN_SERVER }}    # 例如: myregistry.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      # Build 並 push image 到 ACR
+      - name: Build and push Docker image
+        run: |
+          docker build -f WebApiDemo/Dockerfile -t ${{ secrets.ACR_LOGIN_SERVER }}/webapidemo:latest .
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/webapidemo:latest
+
+  # 第三步：部署到 Azure Web App
+  deploy:
+    runs-on: ubuntu-latest
+    needs: push-image
+    steps:
+      # 登入 Azure
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}  # Azure Service Principal 的 JSON
+
+      # 部署到 Azure Web App (Container)
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}  # 你的 Web App 名稱
+          images: ${{ secrets.ACR_LOGIN_SERVER }}/webapidemo:latest
