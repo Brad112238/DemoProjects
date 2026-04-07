@@ -1,4 +1,13 @@
 services:
+  frontend:
+    build:
+      context: ../my-angular-app
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    depends_on:
+      - webapi
+
   webapi:
     build:
       context: .
