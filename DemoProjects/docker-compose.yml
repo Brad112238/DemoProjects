@@ -27,3 +27,8 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=YourStrong!Passw0rd
+      - TZ=Asia/Taipei
+    volumes:
+      - ./sqlserver/init.sql:/docker-entrypoint-initdb/init.sql
+      - ./sqlserver/entrypoint.sh:/docker-entrypoint-initdb/entrypoint.sh
+    entrypoint: /bin/bash /docker-entrypoint-initdb/entrypoint.sh
