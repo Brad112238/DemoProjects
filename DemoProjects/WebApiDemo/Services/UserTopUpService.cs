@@ -1,26 +1,25 @@
-﻿using Microsoft.EntityFrameworkCore;
 using WebApiDemo.Interfaces;
 using WebApiDemo.Models.TestDb;
 
 namespace WebApiDemo.Services
 {
-    public class UserCreditService : IUserCreditService
+    public class UserTopUpService : IUserTopUpService
     {
         private readonly TestContext _context;
 
-        public UserCreditService(TestContext context)
+        public UserTopUpService(TestContext context)
         {
             _context = context;
         }
 
-        public IQueryable<UserCredit> Query()
+        public IQueryable<UserTopUp> Query()
         {
-            return _context.UserCredits.AsNoTracking();
+            return _context.UserTopUps;
         }
 
-        public IQueryable<UserCredit> QueryTracking()
+        public void Add(UserTopUp entity)
         {
-            return _context.UserCredits;
+            _context.UserTopUps.Add(entity);
         }
 
         public async Task SaveChangesAsync()

@@ -1,0 +1,221 @@
+:host {
+  display: block;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h3 {
+  font-size: 16px;
+  margin: 16px 0 8px;
+}
+
+/* 使用者資訊 */
+.user-info {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.user-balance {
+  color: red;
+  font-size: 16px;
+}
+
+/* 錯誤訊息 */
+.alert-error {
+  background-color: #f2dede;
+  border: 1px solid #ebccd1;
+  color: #a94442;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.alert-error ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.error-text {
+  color: red;
+  font-size: 14px;
+}
+
+/* 金額按鈕 */
+.amount-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-amount {
+  padding: 6px 16px;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-amount.selected,
+.btn-invoice.selected {
+  color: #fff;
+  background: linear-gradient(to bottom, #08c, #04c);
+  border-color: #04c;
+}
+
+.amount-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.amount-input-row label {
+  width: 68px;
+}
+
+.amount-input-row input {
+  width: 150px;
+}
+
+/* 隱藏 number spinner */
+.no-spinner::-webkit-inner-spin-button,
+.no-spinner::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-spinner {
+  -moz-appearance: textfield;
+}
+
+/* 發票切換 */
+.invoice-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.btn-invoice {
+  padding: 6px 16px;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* 發票表單 */
+.invoice-form {
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.form-row label {
+  width: 68px;
+  flex-shrink: 0;
+}
+
+.form-row input {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* 按鈕組 */
+.btn-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.btn {
+  padding: 6px 16px;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-primary {
+  color: #fff;
+  background: linear-gradient(to bottom, #08c, #04c);
+  border-color: #04c;
+}
+
+.btn-primary:hover {
+  background: #04c;
+}
+
+/* 確認表格 */
+.confirm-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.confirm-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.label-cell {
+  width: 30%;
+  font-weight: bold;
+  background: #f5f5f5;
+}
+
+.highlight {
+  color: red;
+  font-weight: bold;
+}
+
+/* Loading */
+.loading-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #ddd;
+  border-top-color: #08c;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ECPay 付款區域 */
+.payment-section {
+  margin-top: 20px;
+}
+
+#ECPayPayment {
+  min-height: 200px;
+}

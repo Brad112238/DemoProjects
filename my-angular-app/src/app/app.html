@@ -2,50 +2,9 @@
   <h2>WebApiDemo Client</h2>
 
   <div class="buttons">
-    <button (click)="checkHealth()">Health Check</button>
-    <button (click)="getUserCredits()">Get User Credits</button>
+    <button routerLink="/">首頁</button>
+    <button routerLink="/top-up">儲值</button>
   </div>
 
-  @if (loading()) {
-    <p class="loading">Loading...</p>
-  }
-
-  @if (error()) {
-    <p class="error">{{ error() }}</p>
-  }
-
-  @if (healthResult()) {
-    <div class="result">
-      <h3>Health Check Result</h3>
-      <pre>{{ healthResult() | json }}</pre>
-    </div>
-  }
-
-  @if (userCredits().length > 0) {
-    <div class="result">
-      <h3>User Credits ({{ userCredits().length }} 筆)</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>UserId</th>
-            <th>SmsName</th>
-            <th>Amount</th>
-            <th>CreateTime</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (item of userCredits(); track item.id) {
-            <tr>
-              <td>{{ item.id }}</td>
-              <td>{{ item.userId }}</td>
-              <td>{{ item.smsName }}</td>
-              <td>{{ item.amount }}</td>
-              <td>{{ item.createTime }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  }
+  <router-outlet />
 </div>

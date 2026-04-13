@@ -1,8 +1,11 @@
 name: CD (Azure)
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: DemoProjects
 
 jobs:
   # 第一步：CI 測試

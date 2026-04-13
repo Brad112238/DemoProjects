@@ -17,6 +17,8 @@ public partial class TestContext : DbContext
 
     public virtual DbSet<UserCredit> UserCredits { get; set; }
 
+    public virtual DbSet<UserTopUp> UserTopUps { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -41,6 +43,18 @@ public partial class TestContext : DbContext
             entity.Property(e => e.ModifyTime).HasColumnType("datetime");
             entity.Property(e => e.SmsName).HasMaxLength(20);
             entity.Property(e => e.SmsPassword).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<UserTopUp>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_dbo.UserTopUp");
+
+            entity.ToTable("UserTopUp");
+
+            entity.HasIndex(e => e.UserId, "IX_UserTopUp_UserId");
+
+            entity.Property(e => e.CreateTime).HasColumnType("datetime");
+            entity.Property(e => e.ModifyTime).HasColumnType("datetime");
         });
 
         OnModelCreatingPartial(modelBuilder);

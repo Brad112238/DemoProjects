@@ -23,9 +23,8 @@ namespace WebApiDemo.Services
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<AppResult<EcpayTokenResponse>> CreateTradeTokenAsync(EcpayViewModel request)
+        public async Task<AppResult<EcpayTokenResponse>> CreateTradeTokenAsync(EcpayViewModel request, string tradeNo)
         {
-            string tradeNo = $"{DateTime.Now:yyyyMMdd}{Guid.NewGuid():N}"[..18];
             string tradeDate = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
 
             var payload = new Dictionary<string, object>
@@ -245,13 +244,14 @@ namespace WebApiDemo.Services
         {
             var invoicePayload = new Dictionary<string, object>
             {
-                ["MerchantID"] = _config["EcPay:MerchantID"],
+                ["MerchantID"] = _config["EcPay:InvoiceMerchantID"],
                 ["RelateNumber"] = $"Inv{request.MerchantTradeNo}",
                 ["CustomerEmail"] = request.CustomerEmail,
                 ["Print"] = "0",
                 ["Donation"] = "0",
                 ["TaxType"] = "1",
                 ["SalesAmount"] = request.TotalAmount,
+
                 ["InvType"] = "07",
                 ["Items"] = new List<Dictionary<string, object>>
             {
@@ -288,11 +288,11 @@ namespace WebApiDemo.Services
                     StringEscapeHandling = StringEscapeHandling.EscapeNonAscii
                 });
 
-            string encrypted = Encrypt(payloadJson, _config["EcPay:HashKey"], _config["EcPay:HashIV"]);
+            string encrypted = Encrypt(payloadJson, _config["EcPay:InvoiceHashKey"], _config["EcPay:InvoiceHashIV"]);
 
             var apiRequest = new
             {
-                MerchantID = _config["EcPay:MerchantID"],
+                MerchantID = _config["EcPay:InvoiceMerchantID"],
                 RqHeader = new { Timestamp = GetTimeStamp() },
                 Data = encrypted
             };
@@ -307,18 +307,19 @@ namespace WebApiDemo.Services
                     "application/json")
             );
 
+            string rawResponse = await response.Content.ReadAsStringAsync();
+
             if (!response.IsSuccessStatusCode)
             {
                 return new AppResult<EcpayIssueInvoiceResult>
                 {
                     Code = 400,
                     Success = false,
-                    Message = "ECPay 發票 API 呼叫失敗"
+                    Message = $"ECPay 發票 API 呼叫失敗: {rawResponse}"
                 };
             }
 
-            string responseText = await response.Content.ReadAsStringAsync();
-            var responseJson = JsonConvert.DeserializeObject<Dictionary<string, object>>(responseText);
+            var responseJson = JsonConvert.DeserializeObject<Dictionary<string, object>>(rawResponse);
 
             if (responseJson == null || !responseJson.TryGetValue("Data", out var encryptedResponse))
             {
@@ -330,10 +331,10 @@ namespace WebApiDemo.Services
                 };
             }
 
-            string decrypted = Decrypt(encryptedResponse.ToString(), _config["EcPay:HashKey"], _config["EcPay:HashIV"]);
+            string decrypted = Decrypt(encryptedResponse.ToString(), _config["EcPay:InvoiceHashKey"], _config["EcPay:InvoiceHashIV"]);
 
             string decoded = WebUtility.UrlDecode(decrypted);
-            var data =JsonConvert.DeserializeObject<Dictionary<string, object>>(decoded);
+            var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(decoded);
 
             if (data == null)
             {
@@ -347,7 +348,6 @@ namespace WebApiDemo.Services
 
             if (data["RtnCode"]?.ToString() == "1")
             {
-
                 return new AppResult<EcpayIssueInvoiceResult>
                 {
                     Code = 200,
@@ -368,6 +368,14 @@ namespace WebApiDemo.Services
                 Success = false,
                 Message = data["RtnMsg"]?.ToString()
             };
+        }
+
+        public Dictionary<string, object> DecryptCallbackData(string encryptedData)
+        {
+            string decrypted = Decrypt(encryptedData, _config["EcPay:HashKey"], _config["EcPay:HashIV"]);
+            string decoded = HttpUtility.UrlDecode(decrypted);
+            return JsonConvert.DeserializeObject<Dictionary<string, object>>(decoded)
+                ?? throw new Exception("綠界回傳資料解析失敗");
         }
 
         private static long GetTimeStamp()

@@ -2,7 +2,9 @@
 {
     public class CreateTradeTokenRequest
     {
-        public int UserId { get; set;  }
+        public int UserId { get; set; }
+
+        public int HostId { get; set; }
 
         public string? CarruerNum { get; set; }
 

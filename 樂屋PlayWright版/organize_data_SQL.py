@@ -24,8 +24,8 @@ buildType = {
 def HouseFeatures(soup):
         try:
             HouseFeatures = soup.find("div", class_="block__info-detail").div.text
-            HouseFeatures =HouseFeatures.replace("\n","")
-            HouseFeatures =HouseFeatures.replace("\xa0","")
+            HouseFeatures = HouseFeatures.replace("\n","")
+            HouseFeatures = HouseFeatures.replace("\xa0","")
             if len(HouseFeatures) >= 1000:
                 HouseFeatures = HouseFeatures[0:999]
             return HouseFeatures.strip()

@@ -1,0 +1,24 @@
+<div class="result-container">
+  <div class="result-card" [class.success]="status() === 'success'" [class.fail]="status() === 'fail'">
+    @if (status() === 'success') {
+      <div class="icon icon-success">&#10003;</div>
+      <h2>付款成功</h2>
+    } @else if (status() === 'fail') {
+      <div class="icon icon-fail">&#10007;</div>
+      <h2>付款失敗</h2>
+    } @else {
+      <div class="icon icon-unknown">&#8943;</div>
+      <h2>處理中</h2>
+    }
+
+    <p class="message">{{ message() }}</p>
+
+    @if (tradeNo()) {
+      <p class="trade-no">交易編號：{{ tradeNo() }}</p>
+    }
+
+    <div class="actions">
+      <a routerLink="/top-up" class="btn btn-primary">返回儲值頁</a>
+    </div>
+  </div>
+</div>

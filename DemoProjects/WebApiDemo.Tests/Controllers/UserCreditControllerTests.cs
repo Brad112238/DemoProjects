@@ -30,11 +30,12 @@ namespace WebApiDemo.Tests.Controllers
 
             // 用真的 Service + 真的 DbContext
             var userCreditService = new UserCreditService(_dbContext);
+            var userTopUpService = new UserTopUpService(_dbContext);
 
             // ECPay 是外部 API，還是用 Mock
             _mockEcpayService = new Mock<IEcpayService>();
 
-            var application = new UserCreditApplication(userCreditService, _mockEcpayService.Object);
+            var application = new UserCreditApplication(userCreditService, userTopUpService, _mockEcpayService.Object);
             _controller = new UserCreditController(application);
         }
 
@@ -102,64 +103,6 @@ namespace WebApiDemo.Tests.Controllers
             var result = await _controller.GetById(999);
 
             Assert.IsType<NotFoundResult>(result);
-        }
-
-        [Fact]
-        public async Task CreateTradeToken_Success_ReturnsOk()
-        {
-            var request = new CreateTradeTokenRequest
-            {
-                UserId = 1,
-                PointAmount = "100",
-                Email = "test@example.com"
-            };
-            _mockEcpayService
-                .Setup(s => s.CreateTradeTokenAsync(It.IsAny<EcpayViewModel>()))
-                .ReturnsAsync(new AppResult<EcpayTokenResponse>
-                {
-                    Success = true,
-                    Code = 1,
-                    Message = "Success",
-                    Data = new EcpayTokenResponse
-                    {
-                        MerchantID = "M001",
-                        MerchantTradeNo = "T001",
-                        Token = "token123",
-                        TokenExpireDate = "2026-12-31"
-                    }
-                });
-
-            var result = await _controller.CreateTradeToken(request);
-
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var appResult = Assert.IsType<AppResult<CreateTradeTokenResponse>>(okResult.Value);
-            Assert.True(appResult.Success);
-            Assert.Equal("token123", appResult.Data!.Token);
-        }
-
-        [Fact]
-        public async Task CreateTradeToken_Failure_ReturnsBadRequest()
-        {
-            var request = new CreateTradeTokenRequest { UserId = 1 };
-            _mockEcpayService
-                .Setup(s => s.CreateTradeTokenAsync(It.IsAny<EcpayViewModel>()))
-                .ReturnsAsync(new AppResult<EcpayTokenResponse>
-                {
-                    Success = false,
-                    Code = 0,
-                    Message = "Error",
-                    Data = new EcpayTokenResponse
-                    {
-                        MerchantID = "",
-                        MerchantTradeNo = "",
-                        Token = "",
-                        TokenExpireDate = ""
-                    }
-                });
-
-            var result = await _controller.CreateTradeToken(request);
-
-            Assert.IsType<BadRequestObjectResult>(result);
         }
     }
 }

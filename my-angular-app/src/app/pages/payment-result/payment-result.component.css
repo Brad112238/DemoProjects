@@ -1,0 +1,79 @@
+.result-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 20px;
+}
+
+.result-card {
+  text-align: center;
+  padding: 40px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  max-width: 400px;
+  width: 100%;
+}
+
+.result-card.success {
+  border-color: #4caf50;
+}
+
+.result-card.fail {
+  border-color: #f44336;
+}
+
+.icon {
+  font-size: 48px;
+  width: 80px;
+  height: 80px;
+  line-height: 80px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  color: #fff;
+}
+
+.icon-success {
+  background-color: #4caf50;
+}
+
+.icon-fail {
+  background-color: #f44336;
+}
+
+.icon-unknown {
+  background-color: #ff9800;
+}
+
+h2 {
+  margin: 0 0 12px;
+}
+
+.message {
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.trade-no {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 24px;
+}
+
+.actions {
+  margin-top: 24px;
+}
+
+.btn {
+  padding: 8px 24px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  color: #fff;
+  background: linear-gradient(to bottom, #08c, #04c);
+  border-color: #04c;
+}

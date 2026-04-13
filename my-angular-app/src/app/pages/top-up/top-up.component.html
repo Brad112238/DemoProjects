@@ -1,0 +1,191 @@
+<!-- Step 1: 填寫訂單資料 -->
+@if (step() === 'fill') {
+<div class="top-up-form">
+  <!-- 錯誤訊息 -->
+  @if (errors().length > 0) {
+  <div class="alert alert-error">
+    <ul>
+      @for (err of errors(); track err) {
+      <li>{{ err }}</li>
+      }
+    </ul>
+  </div>
+  }
+
+  <!-- 使用者資訊 -->
+  <div class="user-info">
+    <span class="user-name">{{ userName() }}</span>
+    <span class="user-balance">餘額 <strong>{{ userBalance() }}</strong> 元</span>
+  </div>
+
+  <!-- 儲值金額 -->
+  <h3>儲值金額</h3>
+  <div class="amount-buttons">
+    @for (amount of amounts; track amount) {
+    <button
+      type="button"
+      class="btn-amount"
+      [class.selected]="selectedAmount() === amount"
+      (click)="selectAmount(amount)"
+    >
+      {{ amount }}
+    </button>
+    }
+  </div>
+  <div class="amount-input-row">
+    <label for="pointAmount">金額</label>
+    <input
+      type="number"
+      id="pointAmount"
+      [(ngModel)]="form.pointAmount"
+      (blur)="onAmountBlur()"
+      class="no-spinner"
+    />
+    @if (amountMsg()) {
+    <span class="error-text">{{ amountMsg() }}</span>
+    }
+  </div>
+
+  <!-- 付款方式 -->
+  <h3>付款方式</h3>
+  <p>為加速儲值流程，僅供使用信用卡付款。</p>
+
+  <!-- 電子發票 -->
+  <h3>電子發票</h3>
+  <div class="invoice-toggle">
+    <button
+      type="button"
+      class="btn-invoice"
+      [class.selected]="form.invoiceType === '個人發票'"
+      (click)="switchInvoice('個人發票')"
+    >
+      個人發票
+    </button>
+    <button
+      type="button"
+      class="btn-invoice"
+      [class.selected]="form.invoiceType === '公司發票'"
+      (click)="switchInvoice('公司發票')"
+    >
+      公司發票
+    </button>
+  </div>
+
+  <!-- 個人發票表單 -->
+  @if (form.invoiceType === '個人發票') {
+  <div class="invoice-form">
+    <div class="form-row">
+      <label for="personalEmail">寄送信箱</label>
+      <input
+        type="text"
+        id="personalEmail"
+        [(ngModel)]="form.email"
+        placeholder="example@email.com"
+      />
+    </div>
+    <div class="form-row">
+      <label for="carruerNum">載具編號</label>
+      <input
+        type="text"
+        id="carruerNum"
+        [(ngModel)]="form.carruerNum"
+        (blur)="onCarruerBlur()"
+        placeholder="預設使用綠界載具"
+      />
+    </div>
+  </div>
+  }
+
+  <!-- 公司發票表單 -->
+  @if (form.invoiceType === '公司發票') {
+  <div class="invoice-form">
+    <div class="form-row">
+      <label for="companyTitle">公司名稱</label>
+      <input
+        type="text"
+        id="companyTitle"
+        [(ngModel)]="form.companyTitle"
+      />
+    </div>
+    <div class="form-row">
+      <label for="companyTaxId">統一編號</label>
+      <input
+        type="text"
+        id="companyTaxId"
+        [(ngModel)]="form.companyTaxId"
+        class="no-spinner"
+      />
+    </div>
+    <div class="form-row">
+      <label for="companyAddr">公司地址</label>
+      <input
+        type="text"
+        id="companyAddr"
+        [(ngModel)]="form.companyAddr"
+        placeholder="請輸入縣市區域"
+      />
+    </div>
+    <div class="form-row">
+      <label for="companyEmail">寄送信箱</label>
+      <input
+        type="text"
+        id="companyEmail"
+        [(ngModel)]="form.email"
+        placeholder="example@email.com"
+      />
+    </div>
+  </div>
+  }
+
+  <div class="btn-group">
+    <button type="button" class="btn" routerLink="/">返回</button>
+    <button type="button" class="btn btn-primary" (click)="goToConfirm()">下一步</button>
+  </div>
+</div>
+}
+
+<!-- Step 2: 確認送出資料 -->
+@if (step() === 'confirm') {
+<div class="confirm-form">
+  <h3>請確認資料</h3>
+  <table class="confirm-table">
+    <tbody>
+      @for (item of confirmItems(); track item.name) {
+      <tr>
+        <td class="label-cell">{{ item.name }}</td>
+        <td [class.highlight]="item.highlight">{{ item.value }}</td>
+      </tr>
+      }
+    </tbody>
+  </table>
+
+  <div class="btn-group">
+    <button type="button" class="btn" (click)="goBack()" [disabled]="loading()">返回</button>
+    <button type="button" class="btn btn-primary" (click)="submitOrder()" [disabled]="loading()">
+      @if (loading()) {
+        處理中...
+      } @else {
+        確認送出
+      }
+    </button>
+  </div>
+</div>
+}
+
+<!-- Loading -->
+@if (loading()) {
+<div class="loading-overlay">
+  <div class="spinner"></div>
+  <p>載入中，請稍候...</p>
+</div>
+}
+
+<!-- Step 3: ECPay 付款頁面 -->
+@if (step() === 'payment') {
+<div class="payment-section" [style.display]="loading() ? 'none' : 'block'">
+  <div id="ECPayPayment"></div>
+  <div class="btn-group">
+    <button type="button" class="btn btn-primary" (click)="confirmPayment()">確認付款</button>
+  </div>
+</div>
+}

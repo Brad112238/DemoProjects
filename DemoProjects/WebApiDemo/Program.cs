@@ -1,5 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 using WebApiDemo.Application;
 using WebApiDemo.Interfaces;
 using WebApiDemo.Models.TestDb;
@@ -25,9 +26,20 @@ namespace WebApiDemo
                     builder.Configuration.GetConnectionString("TestDb"));
             });
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.WithOrigins("http://localhost:4200")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
             builder.Services.AddHttpClient();
             builder.Services.AddScoped<IUserCreditService, UserCreditService>();
             builder.Services.AddScoped<IEcpayService, EcpayService>();
+            builder.Services.AddScoped<IUserTopUpService, UserTopUpService>();
             builder.Services.AddScoped<UserCreditApplication>();
 
             var app = builder.Build();
@@ -36,9 +48,12 @@ namespace WebApiDemo
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
+                app.MapScalarApiReference();
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors();
 
             app.UseAuthorization();
 
