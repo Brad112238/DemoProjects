@@ -6,9 +6,6 @@ using WebApiDemo.Controllers;
 using WebApiDemo.Interfaces;
 using WebApiDemo.Models.TestDb;
 using WebApiDemo.Services;
-using WebApiDemo.ViewModels;
-using WebApiDemo.ViewModels.Ecpay;
-using WebApiDemo.ViewModels.UserCredit;
 using Xunit;
 
 namespace WebApiDemo.Tests.Controllers
@@ -32,7 +29,6 @@ namespace WebApiDemo.Tests.Controllers
             var userCreditService = new UserCreditService(_dbContext);
             var userTopUpService = new UserTopUpService(_dbContext);
 
-            // ECPay 是外部 API，還是用 Mock
             _mockEcpayService = new Mock<IEcpayService>();
 
             var application = new UserCreditApplication(userCreditService, userTopUpService, _mockEcpayService.Object);

@@ -9,30 +9,15 @@ import { RouterOutlet, RouterLink } from '@angular/router';
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
+
 export class App {
   private apiBase = '/api';
 
-  healthResult = signal<any>(null);
   userCredits = signal<any[]>([]);
   loading = signal(false);
   error = signal<string | null>(null);
 
   constructor(private http: HttpClient) {}
-
-  checkHealth() {
-    this.loading.set(true);
-    this.error.set(null);
-    this.http.get(`${this.apiBase}/health`).subscribe({
-      next: (res) => {
-        this.healthResult.set(res);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        this.error.set('Health API 呼叫失敗: ' + err.message);
-        this.loading.set(false);
-      }
-    });
-  }
 
   getUserCredits() {
     this.loading.set(true);
