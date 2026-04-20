@@ -1,7 +1,7 @@
 services:
   frontend:
     build:
-      context: ../my-angular-app
+      context: ./my-angular-app
       dockerfile: Dockerfile
     ports:
       - "4200:80"
@@ -10,7 +10,7 @@ services:
 
   webapi:
     build:
-      context: .
+      context: ./DemoProjects
       dockerfile: WebApiDemo/Dockerfile
     ports:
       - "8080:8080"
@@ -29,6 +29,6 @@ services:
       - MSSQL_SA_PASSWORD=YourStrong!Passw0rd
       - TZ=Asia/Taipei
     volumes:
-      - ./sqlserver/init.sql:/docker-entrypoint-initdb/init.sql
-      - ./sqlserver/entrypoint.sh:/docker-entrypoint-initdb/entrypoint.sh
+      - ./DemoProjects/sqlserver/init.sql:/docker-entrypoint-initdb/init.sql
+      - ./DemoProjects/sqlserver/entrypoint.sh:/docker-entrypoint-initdb/entrypoint.sh
     entrypoint: /bin/bash /docker-entrypoint-initdb/entrypoint.sh
