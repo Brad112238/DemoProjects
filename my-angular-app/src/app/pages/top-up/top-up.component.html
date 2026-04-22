@@ -146,7 +146,7 @@
 
 <!-- Step 2: 確認送出資料 -->
 @if (step() === 'confirm') {
-<div class="confirm-form">
+<div class="confirm-form" [style.display]="loading() ? 'none' : 'block'">
   <h3>請確認資料</h3>
   <table class="confirm-table">
     <tbody>
@@ -185,7 +185,13 @@
 <div class="payment-section" [style.display]="loading() ? 'none' : 'block'">
   <div id="ECPayPayment"></div>
   <div class="btn-group">
-    <button type="button" class="btn btn-primary" (click)="confirmPayment()">確認付款</button>
+    <button type="button" class="btn btn-primary" (click)="confirmPayment()" [disabled]="loading()">
+      @if (loading()) {
+        處理中...
+      } @else {
+        確認付款
+      }
+    </button>
   </div>
 </div>
 }

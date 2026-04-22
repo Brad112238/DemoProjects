@@ -248,9 +248,13 @@ export class TopUpComponent implements OnInit, AfterViewChecked {
 
   // 確認付款
   confirmPayment() {
+    this.loading.set(true);
     try {
       ECPay.getPayToken((paymentInfo: any, errMsg: string) => {
-        if (errMsg != null) return;
+        if (errMsg != null) {
+          this.loading.set(false);
+          return;
+        }
 
         const { PayToken, MerchantTradeNo } = paymentInfo;
         this.userCreditService.createPayment(PayToken, MerchantTradeNo).subscribe({
@@ -272,12 +276,14 @@ export class TopUpComponent implements OnInit, AfterViewChecked {
             }
           },
           error: (err) => {
+            this.loading.set(false);
             alert('發生錯誤：' + (err.error?.message || err.message));
           }
         });
       });
     } catch (err) {
       console.error(err);
+      this.loading.set(false);
     }
   }
 }
