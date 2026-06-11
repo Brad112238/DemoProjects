@@ -7,7 +7,11 @@
       "Bash(curl:*)",
       "Bash(docker exec:*)",
       "Bash(netstat -ano)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(dir C:DemoProjects *)",
+      "Bash(where ngrok *)",
+      "Bash(ngrok version *)",
+      "PowerShell(Get-Command *)"
     ]
   }
 }
